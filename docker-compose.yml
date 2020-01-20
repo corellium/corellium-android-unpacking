@@ -1,0 +1,42 @@
+version: '3'
+services:
+  nsqd:
+    image: nsqio/nsq
+    command: /nsqd
+    ports:
+      - "4150:4150"
+      - "4151"
+
+  backend:
+    cap_add:
+      - NET_ADMIN
+    hostname: backend
+    build:
+      context: backend/.
+      dockerfile: Dockerfile
+    ports:
+      - "${SERVE_PORT}:${SERVE_PORT}"
+      - "${ADB_PROXY}:${ADB_PROXY}"
+    environment:
+      - SERVE_PORT=${SERVE_PORT}
+      - CORELLIUM_URL=${CORELLIUM_URL}
+      - CORELLIUM_USERNAME=${CORELLIUM_USERNAME}
+      - CORELLIUM_PASSWORD=${CORELLIUM_PASSWORD}
+      - GIN_MODE=${GIN_MODE}
+      - ADB_PROXY=${ADB_PROXY}
+      - INSTANCE_ID=${INSTANCE_ID}
+    volumes:
+      - ./unpacker-data:/data
+    depends_on:
+      - nsqd
+    restart: always
+
+  unpacker-worker:
+    build:
+      context: unpacker-worker/.
+      dockerfile: Dockerfile
+    volumes:
+      - ./unpacker-data:/data
+    depends_on:
+      - backend
+    restart: always
