@@ -1,12 +1,18 @@
 # Android Unpacking Automation
 
-A bit of automation strung up around an Android 7.1.2 device on Corellium, used to defeating (most) packers on the market. This method targets `art::DexFile::OpenMemory` method for Android 7.1.12 while utilizing a Corellium device to provide an always-on and always-ready device for unpacking. While this current demo only utilized one device, this can essentially be scaled up transparently to the front end as all the "tasks" are handled by `nsqd`.
+A bit of automation strung up around an Android 7.1.2 device on Corellium, used to defeating (most) packers on the market. 
+
+## Description
+This method targets `art::DexFile::OpenMemory` method for Android 7.1.12 while utilizing a Corellium device to provide an always-on and always-ready device for unpacking. While this current demo only utilized one device, this can essentially be scaled up transparently to the front end as all the "tasks" are handled by `nsqd`.
+
+The `backend` sets up a vpn tunnel to the Corellium server, which auto-restarts upon failure, and opens up a reverse proxy to the docker network. This is then utilized by the `unpacker-worker` which uses it to communicate transparently with the device.
 
 ## Building
 
 ### Setup
- - have a corellium account with a device already created and booted up (7.1.2 eng build)
- - fill out `.env` file like so;
+ - Have a corellium account with a device already created and booted up (7.1.2 eng build)
+ - Replace `backend/vpn-profile.ovpn` with the OpenVPN profile from your Corellium device
+ - Fill out `.env` file like so;
 
 ```
 INSTANCE_ID=7cc6ca2a-6622-479b-aa4b-8394aa9d9475-instance-for-unpacker
