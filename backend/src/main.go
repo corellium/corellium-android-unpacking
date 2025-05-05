@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"math/rand"
 	"net"
 	"net/http"
 	"os"
@@ -16,8 +15,8 @@ import (
 	"time"
 
 	"gitea.com/lunny/axmlParser"
-	"github.com/bitly/go-nsq"
 	"github.com/gin-gonic/gin"
+	"github.com/nsqio/go-nsq"
 )
 
 func setupRouter() *gin.Engine {
@@ -229,17 +228,17 @@ func main() {
 	}
 
 	corellium := Corellium{
-		username: user,
-		password: pass,
-		domain:   apiURL,
+		username:   user,
+		password:   pass,
+		domain:     apiURL,
+		instanceID: instanceID,
 	}
 
-	_, err = corellium.Login()
-	if err != nil {
+	if _, err := corellium.Login(); err != nil {
 		log.Panicf("Unable to login : %+v", err)
 	}
 
-	instances, err := corellium.Instances()
+	instance, err := corellium.Instances()
 	if err != nil {
 		log.Panicf("Unable to get instances : %+v", err)
 	}
@@ -247,16 +246,14 @@ func main() {
 	// Find adb port
 	remoteHost := ""
 	remotePort := ""
-	for _, instance := range instances.Instances {
-		if instance.ID == instanceID {
-			log.Printf("Found matching instance ID: %+v", instance)
+	if instance.ID == instanceID {
+		log.Printf("Found matching instance ID: %+v", instance)
 
-			remoteHost = instance.ServicesIP
-			remotePort = instance.PortADB
+		remoteHost = instance.ServiceIP
+		remotePort = instance.PortADB
 
-			if instance.Status != "ACTIVE" {
-				log.Fatalf("Instance may not be ACTIVE, currently set to %s", instance.Status)
-			}
+		if instance.State != "on" || instance.Error != nil {
+			log.Fatalf("Instance may not be on, currently set to %s, error : %+v", instance.State, instance.Error)
 		}
 	}
 
@@ -266,8 +263,7 @@ func main() {
 
 	for {
 		timeout := time.Duration(60 * time.Second)
-		_, err = net.DialTimeout("tcp", fmt.Sprintf("%s:%s", remoteHost, remotePort), timeout)
-		if err != nil {
+		if _, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%s", remoteHost, remotePort), timeout); err != nil {
 			log.Println("Adb host unreachable, retrying in 5 seconds, error : ", err)
 			time.Sleep(5 * time.Second)
 		} else {
@@ -288,7 +284,6 @@ func main() {
 	producer, _ = nsq.NewProducer("nsqd:4150", config)
 	defer producer.Stop()
 
-	rand.Seed(time.Now().UnixNano())
 	router := setupRouter()
 
 	router.Run(fmt.Sprintf(":%d", servePort))

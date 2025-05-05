@@ -1,4 +1,3 @@
-version: '3'
 services:
   nsqd:
     image: nsqio/nsq
@@ -12,8 +11,7 @@ services:
       - NET_ADMIN
     hostname: backend
     build:
-      context: backend/.
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.backend
     ports:
       - "${SERVE_PORT}:${SERVE_PORT}"
       - "${ADB_PROXY}:${ADB_PROXY}"
@@ -33,8 +31,7 @@ services:
 
   unpacker-worker:
     build:
-      context: unpacker-worker/.
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.worker
     volumes:
       - ./unpacker-data:/data
     depends_on:

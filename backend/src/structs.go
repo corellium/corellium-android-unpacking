@@ -23,43 +23,14 @@ type LoginResponse struct {
 	// Expiration   time.Time `json:"expiration"`
 }
 
-// InstancesRequest struct for Instances API call request
-type InstancesRequest struct {
-	Token string `json:"token"`
-}
-
-// InstancesResponse struct for Instances API call response
-type InstancesResponse struct {
-	ProjectData Projects    `json:"projects"`
-	Instances   []Instances `json:"instances"`
-}
-
-// Instances struct data
-type Instances struct {
-	ID         string    `json:"id"`
-	Project    string    `json:"project"`
-	Created    time.Time `json:"created"`
-	Status     string    `json:"status"`
-	Name       string    `json:"name"`
-	PortADB    string    `json:"port-adb"`
-	ServicesIP string    `json:"services"`
-}
-
-// Projects struct data
-type Projects struct {
-	Domain Domain `json:"domain"`
-}
-
-// Domain struct data
-type Domain struct {
-	Domain  string `json:"domain"`
-	Name    string `json:"name"`
-	Label   string `json:"label"`
-	Android bool   `json:"android"`
-	// totp
-	NoIOS       bool   `json:"noIOS"`
-	LicenseType string `json:"licenseType"`
-	Instances   int    `json:"instances"`
-	Cores       int    `json:"cores"`
-	RAM         int64  `json:"ram"`
+// Instance struct data
+type Instance struct {
+	ID        string    `json:"id"`
+	Project   string    `json:"project"`
+	Created   time.Time `json:"created"`
+	State     string    `json:"state"`
+	Error     *string   `json:"error"`
+	Name      string    `json:"name"`
+	PortADB   string    `json:"port-adb"`
+	ServiceIP string    `json:"serviceIp"`
 }
