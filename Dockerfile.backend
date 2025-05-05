@@ -1,4 +1,4 @@
-FROM golang:1.12.4-alpine3.9 as base
+FROM golang:1.24.2-alpine3.21 AS base
 
 RUN set -eux; \
 	apk add --no-cache --virtual git
@@ -15,8 +15,9 @@ RUN mkdir /app
 
 # Build app
 WORKDIR /go/src/app
-COPY ./src/ .
-RUN go get . && \
+COPY go.mod go.sum ./
+COPY backend/src/ .
+RUN go mod tidy && \
     CGO_ENABLED=0 go build -ldflags "-s -w" -o unpack-srv
 
 FROM alpine:latest AS runtime
@@ -27,8 +28,8 @@ RUN apk add --update --no-cache openvpn
 COPY --from=base /etc/passwd /etc/passwd
 COPY --from=base /app /app
 COPY --from=base /go/src/app/unpack-srv /app/unpack-srv
-COPY ./start-services.sh /app/start-services.sh
-COPY ./vpn-profile.ovpn /app/profile.ovpn
+COPY backend/start-services.sh /app/start-services.sh
+COPY backend/vpn-profile.ovpn /app/profile.ovpn
 
 # Explicitly pass in debug to force gin/proxy into debug mode
 ENV GIN_MODE release

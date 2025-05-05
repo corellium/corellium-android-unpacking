@@ -2,9 +2,8 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
 
-	"github.com/google/tcpproxy"
+	"github.com/inetaf/tcpproxy"
 )
 
 var (
@@ -20,10 +19,4 @@ func proxy(address string, localPort int) (int, error) {
 	}()
 
 	return localPort, ret
-}
-
-func proxyRandomLocal(address string) (int, error) {
-	localPort := rand.Intn(9000) + 1000
-
-	return proxy(address, localPort)
 }

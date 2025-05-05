@@ -3,7 +3,8 @@ package main
 import (
 	"bytes"
 	"crypto/tls"
-	"io/ioutil"
+	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -28,5 +29,24 @@ func post(url string, data []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	return ioutil.ReadAll(response.Body)
+	return io.ReadAll(response.Body)
+}
+
+func get(url string, token string) ([]byte, error) {
+	client := getHTTPClient()
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+
+	response, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	return io.ReadAll(response.Body)
 }

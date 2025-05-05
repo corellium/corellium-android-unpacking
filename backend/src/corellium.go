@@ -11,6 +11,7 @@ type Corellium struct {
 	username, password string
 	domain             string
 	token              string
+	instanceID         string
 }
 
 // Login will return a LoginResponse for api usage, utilizing the provided credentials
@@ -42,30 +43,22 @@ func (c *Corellium) Login() (*LoginResponse, error) {
 }
 
 // Instances gets available instances for Corellium server
-func (c *Corellium) Instances() (*InstancesResponse, error) {
+func (c *Corellium) Instances() (*Instance, error) {
 	if c.token == "" {
 		return nil, errors.New("no request token to use")
 	}
 
-	request := InstancesRequest{
-		Token: c.token,
-	}
-
-	var jsonData []byte
-	jsonData, err := json.Marshal(request)
+	response, err := get(
+		fmt.Sprintf("https://%s/api/v1/instances/%s", c.domain, c.instanceID),
+		c.token)
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := post(
-		fmt.Sprintf("https://%s%s", c.domain, "/api/instances"),
-		jsonData)
-
-	var instancesResponse = new(InstancesResponse)
-	err = json.Unmarshal(response, &instancesResponse)
-	if err != nil {
+	var instancesResponse Instance
+	if err := json.Unmarshal(response, &instancesResponse); err != nil {
 		return nil, err
 	}
 
-	return instancesResponse, nil
+	return &instancesResponse, nil
 }
