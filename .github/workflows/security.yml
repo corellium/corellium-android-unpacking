@@ -6,6 +6,8 @@ on:
       - main
       - master
 
+permissions: read-all
+
 jobs:
   check-quality:
     runs-on: ubuntu-latest
@@ -39,8 +41,6 @@ jobs:
     env:
       DD_API_KEY: ${{ secrets.DD_API_KEY }}
       DD_APP_KEY: ${{ secrets.DD_APP_KEY }}
-      DD_SERVICE: go-corellium-api-client
-      DD_ENV: ci
     steps:
     - name: Checkout
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
