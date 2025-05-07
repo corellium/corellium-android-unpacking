@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - master
 
 jobs:
   check-quality:
@@ -12,7 +13,7 @@ jobs:
     env:
       DD_API_KEY: ${{ secrets.DD_API_KEY }}
       DD_APP_KEY: ${{ secrets.DD_APP_KEY }}
-      DD_SERVICE: go-corellium-api-client
+      DD_SERVICE: corellium-android-unpacking
       DD_ENV: ci
     steps:
       - name: Checkout
